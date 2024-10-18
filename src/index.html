@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaderboard</title>
+  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    #leaderboard {
+      margin-top: 20px;
+    }
+    .player {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Real-Time Leaderboard</h1>
+  <div id="leaderboard"></div>
+  <button id="updateScoreBtn">Update Score</button>
+
+  <script>
+    // Connect to the WebSocket server
+    const socket = io('http://localhost:3000'); // Adjust the port if necessary
+
+    // Function to render the leaderboard
+    function renderLeaderboard(data) {
+      const leaderboardDiv = document.getElementById('leaderboard');
+      leaderboardDiv.innerHTML = '';
+      data.forEach(([playerId, score], index) => {
+        leaderboardDiv.innerHTML += `<div class="player">${index + 1}. Player: ${playerId} - Score: ${score}</div>`;
+      });
+    }
+
+    // Request the initial leaderboard data
+    socket.emit('getLeaderboard');
+
+    // Listen for leaderboard updates
+    socket.on('leaderboardUpdate', (data) => {
+      renderLeaderboard(data);
+    });
+
+    // Simulate score updates for testing
+    document.getElementById('updateScoreBtn').addEventListener('click', () => {
+      const playerId = prompt("Enter player ID:");
+      const score = prompt("Enter new score:");
+      socket.emit('updateScore', { playerId, score: Number(score) });
+    });
+  </script>
+</body>
+</html>
